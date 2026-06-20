@@ -1,78 +1,136 @@
 import React, { useState } from 'react';
+import { 
+  Container, Typography, Box, Paper, Table, TableBody, TableCell, 
+  TableContainer, TableHead, TableRow, Button, Chip, Divider,
+  FormGroup, FormControlLabel, Checkbox, TextField
+} from '@mui/material';
 
-const DoctorDashboard = () => {
-  // State to manage appointments data
+export default function DoctorDashboard() {
+  // 1. Mock Data for Upcoming and Past Appointments
   const [appointments, setAppointments] = useState([
-    { id: 1, patientName: "John Doe", specialty: "Dentistry", time: "10:00 AM", status: "Pending" },
-    { id: 2, patientName: "Jane Smith", specialty: "Dentistry", time: "11:30 AM", status: "Pending" },
-    { id: 3, patientName: "Michael Brown", specialty: "Dentistry", time: "01:00 PM", status: "Accepted" },
+    { id: 1, patientName: "Ahmed Ali", specialty: "Cardiology", timeSlot: "10:00 AM - 10:30 AM", status: "Pending" },
+    { id: 2, patientName: "Sara Mohamed", specialty: "Cardiology", timeSlot: "11:00 AM - 11:30 AM", status: "Pending" },
+    { id: 3, patientName: "John Doe", specialty: "Cardiology", timeSlot: "01:00 PM - 01:30 PM", status: "Accepted" },
   ]);
 
-  // Function to handle status update (Accept / Cancel)
+  // 2. State for Doctor Availability Scheduling
+  const [availableDays, setAvailableDays] = useState({
+    Sunday: true, Monday: false, Tuesday: true, Wednesday: false, Thursday: true, Friday: false, Saturday: false
+  });
+  const [startTime, setStartTime] = useState("16:00");
+  const [endTime, setEndTime] = useState("20:00");
+
+  // Handle Appointment Status Change
   const handleStatusChange = (id, newStatus) => {
-    setAppointments(prev => 
-      prev.map(app => app.id === id ? { ...app, status: newStatus } : app)
-    );
+    setAppointments(prev => prev.map(app => app.id === id ? { ...app, status: newStatus } : app));
+  };
+
+  // Handle Working Days Checkbox Change
+  const handleDayChange = (event) => {
+    setAvailableDays({ ...availableDays, [event.target.name]: event.target.checked });
+  };
+
+  // Handle Save Schedule Action
+  const handleSaveSchedule = () => {
+    alert(`Success! Availability schedule updated from ${startTime} to ${endTime}`);
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">
-          Doctor Dashboard - Appointment Management
-        </h1>
-        
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-800 text-white">
-                <th className="p-3">Patient Name</th>
-                <th className="p-3">Specialty</th>
-                <th className="p-3">Time Slot</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {appointments.map(app => (
-                <tr key={app.id} className="border-b hover:bg-gray-50">
-                  <td className="p-3 font-semibold">{app.patientName}</td>
-                  <td className="p-3 text-gray-600">{app.specialty}</td>
-                  <td className="p-3 text-blue-600 font-medium">{app.time}</td>
-                  <td className="p-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      app.status === 'Accepted' ? 'bg-green-100 text-green-700' :
-                      app.status === 'Cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
-                    }`}>
-                      {app.status}
-                    </span>
-                  </td>
-                  <td className="p-3 space-x-2">
-                    {app.status === 'Pending' && (
-                      <>
-                        <button 
-                          onClick={() => handleStatusChange(app.id, 'Accepted')}
-                          className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded-md transition"
-                        >
-                          Accept
-                        </button>
-                        <button 
-                          onClick={() => handleStatusChange(app.id, 'Cancelled')}
-                          className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded-md transition"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+        Doctor Dashboard
+      </Typography>
 
-export default DoctorDashboard;
+      {/* Appointment Management Section */}
+      <Paper sx={{ p: 3, mb: 4, borderRadius: 2 }}>
+        <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+          Upcoming Appointments Management
+        </Typography>
+        <TableContainer>
+          <Table>
+            <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
+              <TableRow>
+                <TableCell>Patient Name</TableCell>
+                <TableCell>Specialty</TableCell>
+                <TableCell>Time Slot</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell align="center">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {appointments.map((app) => (
+                <TableRow key={app.id}>
+                  <TableCell>{app.patientName}</TableCell>
+                  <TableCell>{app.specialty}</TableCell>
+                  <TableCell>{app.timeSlot}</TableCell>
+                  <TableCell>
+                    <Chip 
+                      label={app.status} 
+                      color={app.status === 'Accepted' ? 'success' : app.status === 'Cancelled' ? 'error' : 'warning'} 
+                      size="small" 
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    {app.status === 'Pending' && (
+                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                        <Button variant="contained" color="success" size="small" onClick={() => handleStatusChange(app.id, 'Accepted')}>Accept</Button>
+                        <Button variant="outlined" color="error" size="small" onClick={() => handleStatusChange(app.id, 'Cancelled')}>Cancel</Button>
+                      </Box>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      <Divider sx={{ mb: 4 }} />
+
+      {/* Doctor Scheduling Section */}
+      <Paper sx={{ p: 3, borderRadius: 2 }}>
+        <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
+          Set Your Availability Schedule
+        </Typography>
+        
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="body2" color="textSecondary" gutterBottom>
+            Select the days you are available for appointments:
+          </Typography>
+          <FormGroup row>
+            {Object.keys(availableDays).map((day) => (
+              <FormControlLabel
+                key={day}
+                control={<Checkbox checked={availableDays[day]} onChange={handleDayChange} name={day} color="primary" />}
+                label={day}
+              />
+            ))}
+          </FormGroup>
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 3, mb: 3, flexWrap: 'wrap' }}>
+          <TextField
+            label="Start Time"
+            type="time"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            inputProps={{ step: 300 }} 
+          />
+          <TextField
+            label="End Time"
+            type="time"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            inputProps={{ step: 300 }} 
+          />
+        </Box>
+
+        <Button variant="contained" color="primary" onClick={handleSaveSchedule}>
+          Save Availability Schedule
+        </Button>
+      </Paper>
+    </Container>
+  );
+}
