@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { 
   Container, Typography, Box, Paper, Grid, Card, CardContent, Button, TextField, MenuItem, Select, FormControl, InputLabel 
 } from '@mui/material';
 
 export default function PatientDashboard() {
+  const { user } = useAuth(); // Get logged-in user data from context
+  
   const [doctors] = useState([
     { id: 1, name: "Dr. Mostafa Mahmoud", specialty: "Cardiology" },
     { id: 2, name: "Dr. Mona Ali", specialty: "Pediatrics" },
@@ -34,9 +37,14 @@ export default function PatientDashboard() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#1976d2', mb: 4 }}>
-        Patient Care Portal
+      {/* Dynamic Welcome Message showing the logged-in patient's name */}
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#1976d2', mb: 1 }}>
+        Welcome, {user ? user.name : 'Patient'}
       </Typography>
+      <Typography variant="subtitle1" color="textSecondary" sx={{ mb: 4 }}>
+        Manage your medical appointments and consult expert doctors.
+      </Typography>
+
       <Grid container spacing={4}>
         <Grid item xs={12} md={5}>
           <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 2 }}>
@@ -55,6 +63,7 @@ export default function PatientDashboard() {
             </Box>
           </Paper>
         </Grid>
+
         <Grid item xs={12} md={7}>
           <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 2, minHeight: 240 }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'medium' }}>Your Scheduled Appointments</Typography>
