@@ -5,13 +5,14 @@ import Register from './pages/Auth/Register';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import DoctorDashboard from './pages/Doctor/DoctorDashboard';
 import PatientDashboard from './pages/Patient/PatientDashboard';
+import NotFound from './pages/NotFound'; // تم استيراد الصفحة الجديدة
 import ProtectedRoute from './components/ProtectedRoute';
-import Navbar from './components/Navbar'; // Imported Navbar
+import Navbar from './components/Navbar';
 
 export default function App() {
   return (
     <Router>
-      {/* Navbar will render automatically on top of all dashboards if logged in */}
+      {/* Navbar يظهر في جميع الصفحات التي يوجد فيها مستخدم مسجل */}
       <Navbar />
       
       <Routes>
@@ -44,6 +45,9 @@ export default function App() {
             </ProtectedRoute>
           } 
         />
+
+        {/* مسار الـ 404: سيظهر لأي رابط غير معروف */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
