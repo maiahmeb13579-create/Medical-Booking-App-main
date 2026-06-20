@@ -68,6 +68,17 @@ export default function Login() {
           <Button type="submit" variant="contained" color="primary" fullWidth size="large" sx={{ mt: 1 }}>
             Sign In
           </Button>
+
+          {/* Registered Sign Up link added inside the form box layout */}
+          <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+            Don't have an account?{' '}
+            <span 
+              style={{ color: '#1976d2', cursor: 'pointer', fontWeight: 'bold' }} 
+              onClick={() => navigate('/register')}
+            >
+              Sign Up
+            </span>
+          </Typography>
         </Box>
       </Paper>
     </Container>
