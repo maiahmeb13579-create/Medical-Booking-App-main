@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { adminApi } from '../../api/adminApi';
+import { adminApi } from '../../api/AdminApi.js';
 import { 
   Container, Typography, Box, Paper, TextField, Button, List, ListItem, ListItemText, IconButton, Grid, Chip, CircularProgress 
 } from '@mui/material';
