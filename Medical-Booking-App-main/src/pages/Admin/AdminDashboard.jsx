@@ -1,82 +1,73 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { adminApi } from '../../api/adminApi';
 import { 
-  Container, Typography, Box, Paper, TextField, Button, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Grid 
+  Container, Typography, Box, Paper, TextField, Button, List, ListItem, ListItemText, IconButton, Grid, Chip, CircularProgress 
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function AdminDashboard() {
-  const { user } = useAuth(); // Get logged-in admin data from context
-  const [specialties, setSpecialties] = useState([
-    { id: 1, name: "Cardiology" },
-    { id: 2, name: "Pediatrics" },
-    { id: 3, name: "Dermatology" }
-  ]);
-  const [newSpecialty, setNewSpecialty] = useState("");
+  const [users, setUsers] = useState([]);
+  const [specialties, setSpecialties] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAddSpecialty = (e) => {
-    e.preventDefault();
-    if (!newSpecialty.trim()) return;
-
-    const newCategory = {
-      id: specialties.length + 1,
-      name: newSpecialty
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const usersData = await adminApi.getUsers();
+        const specsData = await adminApi.getSpecialties();
+        setUsers(usersData);
+        setSpecialties(specsData);
+      } catch (error) {
+        console.error("Error loading admin data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
+    fetchData();
+  }, []);
 
-    setSpecialties([...specialties, newCategory]);
-    setNewSpecialty("");
+  const toggleBlockUser = async (id, currentStatus) => {
+    try {
+      if (currentStatus) await adminApi.unblockUser(id);
+      else await adminApi.blockUser(id);
+      setUsers(users.map(u => u.id === id ? { ...u, isBlocked: !currentStatus } : u));
+    } catch (error) {
+      console.error("Error toggling block status:", error);
+    }
   };
 
-  const handleDeleteSpecialty = (id) => {
-    setSpecialties(specialties.filter(item => item.id !== id));
-  };
+  if (loading) return <Container sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}><CircularProgress /></Container>;
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {/* Dynamic Welcome Message showing the logged-in admin's name */}
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: '#c62828', mb: 1 }}>
-        Admin Control Panel
-      </Typography>
-      <Typography variant="h6" color="textSecondary" sx={{ mb: 4 }}>
-        Welcome back, System Admin: {user ? user.name : 'Administrator'}
-      </Typography>
-
+      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4 }}>Admin Control Panel</Typography>
       <Grid container spacing={4}>
-        <Grid item xs={12} md={5}>
-          <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'medium' }}>Add New Medical Specialty</Typography>
-            <Box component="form" onSubmit={handleAddSpecialty} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <TextField 
-                label="Specialty Name" 
-                variant="outlined" 
-                fullWidth 
-                size="small"
-                value={newSpecialty}
-                onChange={(e) => setNewSpecialty(e.target.value)}
-                required
-              />
-              <Button type="submit" variant="contained" color="error" fullWidth>
-                Add Specialty
-              </Button>
-            </Box>
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} md={7}>
-          <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 'medium' }}>Current Specialties List</Typography>
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>Manage Specialties</Typography>
             <List>
-              {specialties.map((specialty) => (
-                <ListItem key={specialty.id} divider>
-                  <ListItemText primary={specialty.name} />
-                  <ListItemSecondaryAction>
-                    <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteSpecialty(specialty.id)}>
-                      <DeleteIcon color="error" />
-                    </IconButton>
-                  </ListItemSecondaryAction>
+              {specialties.map((spec) => (
+                <ListItem key={spec.id} secondaryAction={<IconButton><DeleteIcon /></IconButton>}>
+                  <ListItemText primary={spec.name} />
                 </ListItem>
               ))}
             </List>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>User Moderation</Typography>
+            {users.map((user) => (
+              <Box key={user.id} sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                <Box>
+                  <Typography>{user.name}</Typography>
+                  <Chip label={user.role} size="small" />
+                </Box>
+                <Button onClick={() => toggleBlockUser(user.id, user.isBlocked)} color={user.isBlocked ? "success" : "error"}>
+                  {user.isBlocked ? "Unblock" : "Block"}
+                </Button>
+              </Box>
+            ))}
           </Paper>
         </Grid>
       </Grid>

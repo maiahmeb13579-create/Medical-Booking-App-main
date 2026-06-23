@@ -9,11 +9,11 @@ export const AuthProvider = ({ children }) => {
     setUser({ email, role, name: email.split('@')[0] });
   };
 
-const logout = () => {
-  setUser(null);
-  localStorage.removeItem("user"); 
-  localStorage.clear(); 
-};
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+  };
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
